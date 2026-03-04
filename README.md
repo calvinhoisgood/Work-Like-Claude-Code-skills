@@ -7,6 +7,7 @@ A Codex skill package that enforces a Claude Code-style execution pattern:
 - defensive codebase exploration before edits
 - explicit task tracking for non-trivial work
 - autonomous verify-and-repair loops (lint/test/typecheck)
+![Uploading image.png…]()
 
 ## What This Repository Contains
 
