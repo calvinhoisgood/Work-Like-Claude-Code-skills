@@ -1,0 +1,58 @@
+apiVersion: "agent-skills/v1"
+kind: "SkillManifest"
+
+metadata:
+  name: "work-like-claudecode"
+  title: "Work Like Claude Code"
+  version: "1.0.0"
+  language: "en"
+  owner: "local"
+
+spec:
+  standard:
+    name: "Agent Skills Open Standard"
+    url: "https://agentskills.io/specification"
+  entrypoints:
+    instruction_file: "SKILL.md"
+    core_system_prompt_file: "references/core-system-prompt.xml.md"
+    tool_action_schema_file: "references/tool-action-schemas.yaml"
+  triggers:
+    explicit:
+      - "$work-like-claudecode"
+      - "work-like-claudecode"
+    semantic:
+      - "work like claude code"
+      - "strict engineering execution mode"
+      - "no yapping tool-first coding"
+      - "autonomous lint test fix loop"
+  required_permissions:
+    filesystem:
+      read: true
+      write: true
+    shell:
+      execute: true
+    network:
+      optional: true
+    git:
+      read: true
+      write: true
+  runtime:
+    host_tools_required:
+      - "read"
+      - "grep"
+      - "glob"
+      - "edit"
+      - "multiedit"
+      - "write"
+      - "shell"
+      - "todowrite"
+    host_tools_optional:
+      - "task"
+      - "webfetch"
+      - "websearch"
+  behavior:
+    style: "minimal-output"
+    execution: "tool-first"
+    autonomy: "high"
+    workflow: "Explore -> Plan -> Task -> Verify"
+    verification_policy: "autorepair-until-pass-or-blocked"

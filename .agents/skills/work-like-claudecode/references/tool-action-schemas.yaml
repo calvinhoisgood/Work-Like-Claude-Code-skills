@@ -1,0 +1,177 @@
+version: "1.0.0"
+name: "work-like-claudecode-action-schemas"
+description: "Action contracts that map Explore -> Plan -> Task -> Verify to host file and shell tools."
+
+required_permissions:
+  filesystem:
+    read: true
+    write: true
+  shell:
+    execute: true
+  network:
+    optional: true
+  git:
+    read: true
+    write: true
+
+tool_mapping:
+  explore:
+    preferred: ["glob", "grep", "read"]
+    fallback: ["shell"]
+  plan:
+    preferred: ["todowrite"]
+    fallback: []
+  task:
+    preferred: ["edit", "multiedit", "write"]
+    fallback: ["shell"]
+  verify:
+    preferred: ["shell"]
+    fallback: []
+
+actions:
+  explore_context:
+    phase: "Explore"
+    description: "Collect project context before editing."
+    input_schema:
+      type: object
+      properties:
+        objective:
+          type: string
+        targets:
+          type: array
+          items:
+            type: string
+        discover_configs:
+          type: boolean
+          default: true
+      required: ["objective"]
+    output_schema:
+      type: object
+      properties:
+        files_examined:
+          type: array
+          items:
+            type: string
+        conventions_found:
+          type: array
+          items:
+            type: string
+        risk_notes:
+          type: array
+          items:
+            type: string
+      required: ["files_examined", "conventions_found"]
+
+  plan_todos:
+    phase: "Plan"
+    description: "Create or update a task list with strict state transitions."
+    input_schema:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              content:
+                type: string
+              status:
+                type: string
+                enum: ["pending", "in_progress", "completed"]
+            required: ["id", "content", "status"]
+      required: ["tasks"]
+    output_schema:
+      type: object
+      properties:
+        active_task_id:
+          type: string
+        completed_count:
+          type: integer
+      required: ["completed_count"]
+
+  task_execute:
+    phase: "Task"
+    description: "Apply source edits directly with tools."
+    input_schema:
+      type: object
+      properties:
+        edits:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              operation:
+                type: string
+                enum: ["edit", "multiedit", "write", "delete"]
+              intent:
+                type: string
+            required: ["file", "operation", "intent"]
+      required: ["edits"]
+    output_schema:
+      type: object
+      properties:
+        changed_files:
+          type: array
+          items:
+            type: string
+        unresolved_issues:
+          type: array
+          items:
+            type: string
+      required: ["changed_files"]
+
+  verify_and_repair:
+    phase: "Verify"
+    description: "Run quality gates and autonomously repair failures."
+    input_schema:
+      type: object
+      properties:
+        commands:
+          type: array
+          items:
+            type: string
+        autorepair:
+          type: boolean
+          default: true
+      required: ["commands"]
+    output_schema:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["pass", "fail", "blocked"]
+        attempts:
+          type: integer
+        failed_commands:
+          type: array
+          items:
+            type: string
+        blocker:
+          type: string
+      required: ["status", "attempts"]
+
+state_machine:
+  start: "Explore"
+  transitions:
+    - from: "Explore"
+      to: "Plan"
+      condition: "context_sufficient"
+    - from: "Plan"
+      to: "Task"
+      condition: "tasks_defined"
+    - from: "Task"
+      to: "Verify"
+      condition: "edits_applied"
+    - from: "Verify"
+      to: "Task"
+      condition: "status == fail"
+    - from: "Verify"
+      to: "Done"
+      condition: "status == pass"
+    - from: "Verify"
+      to: "Blocked"
+      condition: "status == blocked"

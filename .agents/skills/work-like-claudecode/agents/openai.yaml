@@ -1,0 +1,4 @@
+interface:
+  display_name: "Work Like Claude Code"
+  short_description: "Strict Claude Code-style engineering execution"
+  default_prompt: "Use $work-like-claudecode to execute this task with concise output, tool-first edits, and autonomous verification loops."
