@@ -8,6 +8,9 @@ A Codex skill package that enforces a Claude Code-style execution pattern:
 - explicit task tracking for non-trivial work
 - autonomous verify-and-repair loops (lint/test/typecheck)
 
+<img width="605" height="721" alt="螢幕擷取畫面 2026-03-04 162110" src="https://github.com/user-attachments/assets/324d183d-2c9f-46fd-872f-b4d8fb63e0aa" />
+
+
 ## What This Repository Contains
 
 Primary skill package:
